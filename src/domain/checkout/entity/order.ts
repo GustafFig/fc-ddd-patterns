@@ -25,6 +25,16 @@ export default class Order {
     return this._items;
   }
 
+  addItem(item: OrderItem): void {
+    const alreadyItem = this._items.find((orderItem) => orderItem.productId === item.productId);
+    if (alreadyItem) {
+      alreadyItem.increaseBy(item.quantity);
+    } else {
+      this._items = [...this._items, item];
+    }
+    this.validate();
+  }
+
   validate(): boolean {
     if (this._id.length === 0) {
       throw new Error("Id is required");

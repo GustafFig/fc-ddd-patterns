@@ -35,6 +35,10 @@ export default class OrderItem {
     return this._quantity;
   }
 
+  increaseBy(value: number) {
+    this._quantity += value;
+  }
+
   get price(): number {
     return this._price * this._quantity;
   }

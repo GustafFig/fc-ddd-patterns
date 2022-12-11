@@ -12,6 +12,39 @@ import OrderItemModel from "./order-item.model";
 import OrderModel from "./order.model";
 import OrderRepository from "./order.repository";
 
+const createCustomer = async () => {
+  const customer = new Customer("123", "Customer 1");
+  const address = new Address("Street 1", 1, "Zipcode 1", "City 1");
+  customer.changeAddress(address);
+  const customerRepository = new CustomerRepository();
+  await customerRepository.create(customer);
+  return customer;
+};
+
+const createProduct = async  () => {
+  const product = new Product("123", "Product 1", 10);
+  const productRepository = new ProductRepository();
+  await productRepository.create(product);
+  return product;
+};
+
+const createDependencies = async (): Promise<{
+  customer: Customer;
+  product: Product;
+  ordemItem: OrderItem;
+}> => {
+  const customer = await createCustomer();
+  const product = await createProduct();
+  const ordemItem = new OrderItem(
+    "1",
+    product.name,
+    product.price,
+    product.id,
+    2
+  );
+  return { customer, product, ordemItem };
+};
+
 describe("Order repository test", () => {
   let sequelize: Sequelize;
 
