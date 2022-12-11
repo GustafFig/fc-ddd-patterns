@@ -22,4 +22,43 @@ export default class OrderRepository {
       }
     );
   }
+
+  async update(entity: Order): Promise<void> {
+    const transaction = await OrderModel.sequelize?.transaction();
+    try {
+      const updateItems = entity.items.map(async (item) => {
+        return OrderItemModel.upsert(
+          {
+            id: item.id,
+            name: item.name,
+            price: item.price,
+            product_id: item.productId,
+            quantity: item.quantity,
+            order_id: entity.id,
+          },
+          {
+            transaction: transaction,
+            fields: ["name", "price", "quantity"],
+          }
+        );
+      });
+      await Promise.all(updateItems);
+
+      await OrderModel.update(
+        {
+          id: entity.id,
+          customer_id: entity.customerId,
+          total: entity.total(),
+        },
+        {
+          where: { id: entity.id },
+          transaction: transaction,
+        }
+      );
+      await transaction.commit();
+    } catch (err) {
+      await transaction?.rollback();
+      console.log(err);
+    }
+  }
 }
