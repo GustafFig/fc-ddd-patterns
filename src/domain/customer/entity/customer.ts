@@ -1,3 +1,6 @@
+import EventDispatcher from "../../@shared/event/event-dispatcher";
+import CustomerChangedAddressEvent from "../event/customer-changed-address.event";
+import SendConsoleLogWhenCustomerChangeAddressHandler from "../event/handler/send-console-log-when-customer-change-address";
 import Address from "../value-object/address";
 
 export default class Customer {
@@ -6,12 +9,14 @@ export default class Customer {
   private _address!: Address;
   private _active: boolean = false;
   private _rewardPoints: number = 0;
+  private _eventDispatcher: EventDispatcher;
 
-  constructor(id: string, name: string) {
+  constructor(id: string, name: string, eventDispatcher?: EventDispatcher) {
     this._id = id;
     this._name = name;
     this.validate();
-  }
+    this._eventDispatcher = eventDispatcher || new EventDispatcher();
+  }    
 
   get id(): string {
     return this._id;
@@ -42,9 +47,15 @@ export default class Customer {
   get Address(): Address {
     return this._address;
   }
-  
+
   changeAddress(address: Address) {
     this._address = address;
+    const customerChangedAddressEvent = new CustomerChangedAddressEvent({
+      customer_id: this._id,
+      customer_name: this._name,
+      address: this._address.toString(),
+    });
+    this._eventDispatcher.notify(customerChangedAddressEvent);
   }
 
   isActive(): boolean {

@@ -1,3 +1,5 @@
+import EventDispatcher from "../../@shared/event/event-dispatcher";
+import SendConsoleLogWhenCustomerChangeAddressHandler from "../event/handler/send-console-log-when-customer-change-address";
 import Address from "../value-object/address";
 import Customer from "./customer";
 
@@ -59,5 +61,17 @@ describe("Customer unit tests", () => {
 
     customer.addRewardPoints(10);
     expect(customer.rewardPoints).toBe(20);
+  });
+
+  it("should notify an event when address is changed", () => {
+    const eventDispatcher = new EventDispatcher();
+    const handler = new SendConsoleLogWhenCustomerChangeAddressHandler();
+    const handlerSpy = jest.spyOn(handler, "handle");
+    eventDispatcher.register("CustomerChangedAddressEvent", handler);
+    const customer = new Customer("1", "Customer 1", eventDispatcher);
+
+    const address = new Address("Street 1", 123, "13330-250", "São Paulo");
+    customer.changeAddress(address);
+    expect(handlerSpy).toHaveBeenCalled();
   });
 });
